@@ -1,0 +1,19 @@
+# Folders to ignore
+.vscode/
+backups/
+source_repo/
+
+# Environment files
+.env
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+
+# Output files
+timeline.json
+index.html
