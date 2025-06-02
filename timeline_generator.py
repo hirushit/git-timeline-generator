@@ -151,12 +151,21 @@ def analyze_repo(repo: Repo, branch: str, max_commits=None):
                 "commit_id": commit.hexsha[:7]
             })
 
-            # Add remaining feature-related events based on config offsets
+            # Create a mapping from event names to the correct developer roles
+            role_map = {
+                "FEATURE_PLAN": planner,
+                "FEATURE_DESIGN": designer,
+                "FEATURE_DESIGN_REVIEW": reviewer,
+                "FEATURE_PR_OPEN": proposer,
+                "FEATURE_PR_REVIEW": reviewer,
+                "FEATURE_PR_CLOSE": proposer,
+            }
+
             timeline_events.extend([
                 {
                     "event": event_name,
                     "date": (commit_date + timedelta(days=FEATURE_OFFSETS[event_name])).isoformat(),
-                    "developer": locals().get(event_name.split("_")[1].lower(), proposer),
+                    "developer": role_map.get(event_name, proposer),
                     "feature": feature_id
                 }
                 for event_name in FEATURE_OFFSETS
@@ -177,7 +186,6 @@ def analyze_repo(repo: Repo, branch: str, max_commits=None):
                 "author": author
             })
 
-            # Add bug-fix related events
             timeline_events.extend([
                 {
                     "event": event_name,

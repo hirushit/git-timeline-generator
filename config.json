@@ -2,7 +2,7 @@
   "repo_url": "https://github.com/redis/redis.git",
   "branch": "unstable",
   "local_path": "source_repo",
-  "max_commits": null,
+  "max_commits": 100,
   "large_commit_line_threshold": 100,
   "commit_message_summary_threshold": 50,
   "use_llm_summarizer": false,
