@@ -1,5 +1,6 @@
 {
   "repo_url": "https://github.com/redis/redis.git",
+  "remote_name": "origin",  
   "branch": "unstable",
   "local_path": "source_repo",
   "max_commits": 100,
@@ -8,17 +9,17 @@
   "use_llm_summarizer": false,
   "developer_leave_inactivity_days": 30,
   "feature_event_offsets": {
-    "FEATURE_PLAN": 1,
-    "FEATURE_DESIGN": 2,
-    "FEATURE_DESIGN_REVIEW": 3,
-    "FEATURE_PR_OPEN": 4,
-    "FEATURE_PR_REVIEW": 5,
-    "FEATURE_PR_CLOSE": 6
+      "FEATURE_PLAN": -5,
+      "FEATURE_DESIGN": -4,
+      "FEATURE_DESIGN_REVIEW": -3,
+      "FEATURE_PR_OPEN": -2,
+      "FEATURE_PR_REVIEW": -1,
+      "FEATURE_PR_CLOSE": 0
   },
   "bug_event_offsets": {
-    "BUG_PR_OPEN": 1,
-    "BUG_PR_REVIEW": 2,
-    "BUG_PR_CLOSE": 3,
-    "BUG_CLOSE": 4
+      "BUG_PR_OPEN": -3,
+      "BUG_PR_REVIEW": -2,
+      "BUG_PR_CLOSE": -1,
+      "BUG_CLOSE": 0
   }
 }

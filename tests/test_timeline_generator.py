@@ -2,6 +2,7 @@ import pytest
 import logging
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock
+from collections import defaultdict
 from timeline_generator import (
     summarize_commit_message,
     pick_other_dev,
@@ -63,26 +64,76 @@ def test_summarize_commit_message_llm_error(monkeypatch):
 
 # Tests for pick_other_dev 
 
+def create_mock_dev_activity(devs, base_date):
+    """Helper to create mock dev_activity structure"""
+    activity = defaultdict(lambda: {
+        "first_commit": None,
+        "last_commit": None,
+        "last_commit_id": None
+    })
+    
+    for i, dev in enumerate(devs):
+        activity[dev] = {
+            "first_commit": base_date - timedelta(days=30),
+            "last_commit": base_date - timedelta(days=i),  # Stagger last commits
+            "last_commit_id": f"commit_{i}"
+        }
+    
+    return activity
+
 def test_pick_other_dev_basic():
     devs = ["Alice", "Bob", "Charlie"]
     exclude = ["Alice"]
-    chosen = pick_other_dev(devs, exclude)
+    as_of_day = datetime.now()
+    dev_activity = create_mock_dev_activity(devs, as_of_day)
+    
+    chosen = pick_other_dev(devs, exclude, as_of_day, dev_activity)
     logger.info(f"test_pick_other_dev_basic: devs={devs}, exclude={exclude}, chosen='{chosen}'")
     assert chosen in ["Bob", "Charlie"]
 
 def test_pick_other_dev_all_excluded():
     devs = ["Alice"]
     exclude = ["Alice"]
-    chosen = pick_other_dev(devs, exclude)
+    as_of_day = datetime.now()
+    dev_activity = create_mock_dev_activity(devs, as_of_day)
+    
+    chosen = pick_other_dev(devs, exclude, as_of_day, dev_activity)
     logger.info(f"test_pick_other_dev_all_excluded: devs={devs}, exclude={exclude}, chosen='{chosen}'")
     assert chosen == "Alice"
 
 def test_pick_other_dev_no_exclusions():
     devs = ["Alice", "Bob"]
     exclude = []
-    chosen = pick_other_dev(devs, exclude)
+    as_of_day = datetime.now()
+    dev_activity = create_mock_dev_activity(devs, as_of_day)
+    
+    chosen = pick_other_dev(devs, exclude, as_of_day, dev_activity)
     logger.info(f"test_pick_other_dev_no_exclusions: devs={devs}, exclude={exclude}, chosen='{chosen}'")
     assert chosen in devs
+
+def test_pick_other_dev_inactive_developers():
+    devs = ["Alice", "Bob", "Charlie"]
+    exclude = ["Alice"]
+    as_of_day = datetime.now()
+    
+    # Create activity where Bob and Charlie are inactive (last commit > DEVELOPER_INACTIVITY_DAYS ago)
+    dev_activity = defaultdict(lambda: {
+        "first_commit": None,
+        "last_commit": None,
+        "last_commit_id": None
+    })
+    
+    for dev in devs:
+        dev_activity[dev] = {
+            "first_commit": as_of_day - timedelta(days=60),
+            "last_commit": as_of_day - timedelta(days=DEVELOPER_INACTIVITY_DAYS + 5),  # Inactive
+            "last_commit_id": f"commit_{dev}"
+        }
+    
+    chosen = pick_other_dev(devs, exclude, as_of_day, dev_activity)
+    logger.info(f"test_pick_other_dev_inactive_developers: devs={devs}, exclude={exclude}, chosen='{chosen}'")
+    # Should fall back to excluded dev when no active devs available
+    assert chosen == "Alice"
 
 # Tests for analyze_repo
 
